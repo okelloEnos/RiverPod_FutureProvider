@@ -1,30 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:registration_practice/pages/Registration.dart';
+import 'package:registration_practice/state/photoProvider.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class MyHomePage extends ConsumerWidget {
 
   void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    print('Addition');
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
+    // final countProvider = useProvider(userSignUpState);
+    var temp = watch(userSignUpState);
+    print('Consumer ${temp.counterIncrement}');
     return Scaffold(
       appBar: AppBar(
         title: Text("Sunday"),
@@ -37,7 +27,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'You have pushed the button this many times:',
             ),
             Text(
-              '$_counter',
+              'lop ${temp.counterIncrement}',
+              // '${countProvider.counterIncrement}',
               style: Theme.of(context).textTheme.headline4,
             ),
             RaisedButton(onPressed: (){
@@ -47,6 +38,26 @@ class _MyHomePageState extends State<MyHomePage> {
               // Navigator.canPop(context);
             },
             child: Text('Load Details'),),
+            RaisedButton(
+              color: Colors.deepOrange,
+              onPressed: (){
+                temp.setIsSignUp(true);
+              Navigator.of(context).pushNamed('/reg');
+              // Navigator.maybePop(context);
+              // Navigator.pop(context);
+              // Navigator.canPop(context);
+            },
+              child: Text('Create Account'),),
+            RaisedButton(
+              color: Colors.blue,
+              onPressed: (){
+                temp.setIsSignUp(false);
+              Navigator.of(context).pushNamed('/reg');
+              // Navigator.maybePop(context);
+              // Navigator.pop(context);
+              // Navigator.canPop(context);
+            },
+              child: Text('Log In'),),
 
           ],
         ),
@@ -58,7 +69,13 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.all(30.0),
             child: FloatingActionButton(
-              onPressed: _incrementCounter,
+              onPressed: (){
+                temp.setCount(temp.counterIncrement);
+                // useState(
+                //     countProvider.setCount(countProvider.counterIncrement);
+                // );
+                // countProvider.setCount(countProvider.counterIncrement);
+              },
               tooltip: 'Increment',
               child: Icon(Icons.add),
               heroTag: 'Add',

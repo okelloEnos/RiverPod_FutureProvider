@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:registration_practice/state/photoProvider.dart';
 
 class RegisterPage extends HookWidget{
 bool isSignUp = false;
   @override
   Widget build(BuildContext context) {
+    final auth = useProvider(userSignUpState);
+    isSignUp = auth.isSignUp;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Register'),
+        title: isSignUp ? Text('Register') : Text('Log In'),
       ),
       body: SingleChildScrollView(
         child: isSignUp ? Column(
