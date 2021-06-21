@@ -9,6 +9,70 @@ void statementListProvider = StateNotifierProvider((ref){
   return StatementNotifier();
 });
 
+class StatementDataSource extends DataTableSource{
+
+  StatementDataSource({@required List<Statement> enosStatement, List<Statement> allTotal, int runnableBalance})
+      : _statement = enosStatement, _allTotal = allTotal, _runnableBalance = runnableBalance, assert(enosStatement != null);
+  final List<Statement> _statement ;
+  List<Statement> _allTotal;
+  int _runnableBalance;
+  int selectedCount = 0;
+
+
+  @override
+  // TODO: implement rowCount
+  int get rowCount => _statement.length;
+
+  @override
+  // TODO: implement isRowCountApproximate
+  bool get isRowCountApproximate => false;
+
+  @override
+  // TODO: implement selectedRowCount
+  int get selectedRowCount => selectedCount ;
+
+  @override
+  DataRow getRow(int index) {
+    final Statement statement = _statement[index];
+
+    print('Whats not Happening :: ${_statement.length}');
+    if(_allTotal.isEmpty){
+      if(statement.billType == 'Bill'){
+        _runnableBalance =  statement.credit;
+      }
+      else{
+        _runnableBalance = 0;
+      }
+    }
+    else{
+      if(statement.billType == 'Bill'){
+        _runnableBalance = _runnableBalance + statement.credit;
+        // for(var i in total){
+        //   runningBalance = runningBalance + i.credit;
+        // }
+      }
+      else{
+        _runnableBalance = _runnableBalance - statement.debit;
+        // for(var j in total){
+        //   runningBalance = runningBalance - j.debit;
+        // }
+      }
+    }
+
+    _allTotal.add(statement);
+    // TODO: implement getRow
+    return DataRow.byIndex(
+      index: index,
+      cells: <DataCell>[
+      DataCell(Text('${'Jun 30, 2019'}')),
+      DataCell(Text('${statement.billType}')),
+      DataCell(Text('${statement.refNumber}')),
+      DataCell(Text('${statement.credit}')),
+      DataCell(Text('${statement.debit}')),
+      DataCell(Text('$_runnableBalance'))
+    ]);
+  }
+}
 class DatatableScreen extends StatefulWidget {
   @override
   _DatatableState createState() => _DatatableState();
@@ -17,6 +81,11 @@ class DatatableScreen extends StatefulWidget {
 class _DatatableState extends State<DatatableScreen> {
 var futureStatements;
 List<Statement> listOfStatement = [];
+final list = [];
+var statementSource;
+int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
+List<Statement> total = [];
+int runningBalance = 0;
 
 Future<TokenResponse> logInToken() async {
   TokenResponse tokenResponse;
@@ -89,56 +158,139 @@ Future<List<Statement>> statementListDetails() async {
   void initState() {
     // TODO: implement initState
     futureStatements = statementListDetails();
+    print('Just a Formality ${listOfStatement.length}');
+    statementSource = StatementDataSource(enosStatement: listOfStatement);
     super.initState();
   }
+
+   // = StatementDataSource(enosStatement: listOfStatement);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Table Test'),
-      ),
+      // appBar: AppBar(
+      //   title: Text('Table Test'),
+      // ),
       body:
-      FutureBuilder(
-          future: futureStatements,
-          builder: (context, snapshot){
-           if(snapshot.hasData){
-             // return Text('What is Responsible ${snapshot.data.length}');
-             return SingleChildScrollView(
-               scrollDirection: Axis.horizontal,
-               child: SingleChildScrollView(
-                 child: DataTable(columns: [
-                   DataColumn(label: Text('Date')),
-                   DataColumn(label: Text('Type')),
-                   DataColumn(label: Text('Reference')),
-                   DataColumn(label: Text('Credit')),
-                   DataColumn(label: Text('Debit')),
-                   DataColumn(label: Text('Running Balance'))
-                 ], rows: 
-                 // [
-                 //  DataRow(cells: <DataCell>[
-                 //    DataCell(Text('Okello')),
-                 //    DataCell(Text('Enos')),
-                 //    DataCell(Text('34km')),
-                 //    DataCell(Text('Kes 540')),
-                 //    DataCell(Text('Lupin')),
-                 //  ])
-                 // ]
-                   listOfStatement.map((e) => DataRow(cells: <DataCell>[
-                     DataCell(Text('${'Jun 30, 2019'}')),
-                     DataCell(Text('${'Bill'}')),
-                     DataCell(Text('${'Standing Order'}')),
-                     DataCell(Text('${0.0}')),
-                     DataCell(Text('${0.0}')),
-                     DataCell(Text('${0.0}'))
-                   ])).toList(),
+      SafeArea(
+        child: FutureBuilder(
+            future: futureStatements,
+            builder: (context, snapshot){
+             if(snapshot.hasData){
+               print('${listOfStatement.length} ::What is the Status bas of Now ${snapshot.data.length}');
+               statementSource = StatementDataSource(enosStatement: listOfStatement, allTotal: total, runnableBalance: runningBalance);
+               // return Text('What is Responsible ${snapshot.data.length}');
+               return snapshot.data.isEmpty ? Column(
+                 children: [
+                   SafeArea(
+                     child: Padding(
+                       padding: const EdgeInsets.all(20.0),
+                       child: Column(
+                         children: [
+                           Container(
+                             height: 30,
+                             // color: Colors.teal,
+                             child: Row(
+                               mainAxisAlignment: MainAxisAlignment.start,
+                               children: [
+                                 // Container(
+                                 //   child: IconButton(icon: Icon(Icons.arrow_back), onPressed: null),
+                                 // ),
+                                 IconButton(icon: Icon(Icons.arrow_back), onPressed: (){
+                                   Navigator.pop(context);
+                                 }),
+                                 SizedBox(width: 10,),
+                                 Text('Statements', style: TextStyle(fontSize: 20),)
+                               ],
+                             ),
+
+                           ),
+                           SizedBox(height: 100),
+                           Center(child: Text('No Statement at the Moment')),
+                           // CircularProgressIndicator(),
+                         ],
+                       ),
+                     ),
+                   ),
+                 ],
+               ) : SingleChildScrollView(
+                 scrollDirection: Axis.horizontal,
+                 child: SingleChildScrollView(
+                   child: Container(
+                     width: MediaQuery.of(context).size.width,
+                     // height: 1000,
+                     child: SingleChildScrollView(
+                       child: PaginatedDataTable(
+                         columnSpacing: 30,
+                         onRowsPerPageChanged: (r){
+                           print('Cool $r');
+                           setState(() {
+                             _rowsPerPage = r;
+                           });
+                         },
+                         rowsPerPage: _rowsPerPage,
+                         header: Container(
+                           // color: Colors.teal,
+                           child: Row(
+                             mainAxisAlignment: MainAxisAlignment.start,
+                             children: [
+                               // Container(
+                               //   child: IconButton(icon: Icon(Icons.arrow_back), onPressed: null),
+                               // ),
+                               IconButton(icon: Icon(Icons.arrow_back), onPressed: (){
+                                 Navigator.pop(context);
+                               }),
+                               SizedBox(width: 10,),
+                               Text('Statements', style: TextStyle(fontSize: 20),)
+                             ],
+                           ),
+                         ),
+                           source: statementSource,
+                           columns: [
+                         DataColumn(label: Text('Date')),
+                         DataColumn(label: Text('Type')),
+                         DataColumn(label: Text('Reference')),
+                         DataColumn(label: Text('Credit')),
+                         DataColumn(label: Text('Debit')),
+                         DataColumn(label: Text('Running Balance'))
+                       ],
+                       ),
+                     ),
+                   ),
                  ),
-               ),
-             );
-           }
-           else{
-             return CircularProgressIndicator();
-           }
-          })
+               );
+             }
+             else{
+               return SafeArea(
+                 child: Padding(
+                   padding: const EdgeInsets.all(20.0),
+                   child: Column(
+                     children: [
+                       Container(
+                         height: 30,
+                         // color: Colors.teal,
+                         child: Row(
+                           mainAxisAlignment: MainAxisAlignment.start,
+                           children: [
+                             // Container(
+                             //   child: IconButton(icon: Icon(Icons.arrow_back), onPressed: null),
+                             // ),
+                             IconButton(icon: Icon(Icons.arrow_back), onPressed: (){
+                               Navigator.pop(context);
+                             }),
+                             SizedBox(width: 10,),
+                             Text('Statements', style: TextStyle(fontSize: 20),)
+                           ],
+                         ),
+                       ),
+                       SizedBox(height: 100),
+                       CircularProgressIndicator(),
+                     ],
+                   ),
+                 ),
+               );
+             }
+            }),
+      )
       // Consumer(builder: (context, watch, child){
       //   final listStatement = watch(statementProviderList.state);
       //   AsyncValue <List<Statement>> states = watch(statementProviderList.state);
