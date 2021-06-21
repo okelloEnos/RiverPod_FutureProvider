@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:registration_practice/noInternet/internet_not_available.dart';
 import 'package:registration_practice/pages/Home.dart';
 import 'package:registration_practice/pages/Registration.dart';
+import 'package:registration_practice/pages/TestConnection.dart';
 import 'package:registration_practice/pages/ViewPhotos.dart';
 import 'package:registration_practice/pages/check.dart';
 import 'package:registration_practice/pages/internet.dart';
@@ -25,7 +26,8 @@ void main() {
         "/load" : (context) => PaymentWeb(),
         "/net" : (context) => InternetChecker(),
         "/status" : (context) => CheckNetwork(),
-        "/animation" : (context) => InternetNotAvailable()
+        "/animation" : (context) => InternetNotAvailable(),
+        "/ful" : (context) => SubConnection()
       },
       theme: new ThemeData(
         primaryColor: Colors.amberAccent,

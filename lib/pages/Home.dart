@@ -85,12 +85,12 @@ class MyHomePage extends ConsumerWidget {
               RaisedButton(
                 color: Colors.pink,
                 onPressed: (){
-                  Navigator.of(context).pushNamed('/load');
+                  Navigator.of(context).pushNamed('/ful');
                   // Navigator.maybePop(context);
                   // Navigator.pop(context);
                   // Navigator.canPop(context);
                 },
-                child: Text('Official View'),),
+                child: Text('StateFul Check'),),
               RaisedButton(
                 color: Colors.purple,
                   onPressed: (){
