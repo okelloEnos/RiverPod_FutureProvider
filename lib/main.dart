@@ -6,6 +6,7 @@ import 'package:registration_practice/pages/Registration.dart';
 import 'package:registration_practice/pages/TestConnection.dart';
 import 'package:registration_practice/pages/ViewPhotos.dart';
 import 'package:registration_practice/pages/check.dart';
+import 'package:registration_practice/pages/datatable_screen.dart';
 import 'package:registration_practice/pages/internet.dart';
 import 'package:registration_practice/pages/payment.dart';
 import 'package:registration_practice/pages/paymentCard.dart';
@@ -27,7 +28,8 @@ void main() {
         "/net" : (context) => InternetChecker(),
         "/status" : (context) => CheckNetwork(),
         "/animation" : (context) => InternetNotAvailable(),
-        "/ful" : (context) => SubConnection()
+        "/ful" : (context) => SubConnection(),
+        "/statement" : (context) => DatatableScreen()
       },
       theme: new ThemeData(
         primaryColor: Colors.amberAccent,

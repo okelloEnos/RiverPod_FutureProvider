@@ -40,6 +40,13 @@ class MyHomePage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.headline4,
               ),
               RaisedButton(onPressed: (){
+                Navigator.of(context).pushNamed('/statement');
+                // Navigator.maybePop(context);
+                // Navigator.pop(context);
+                // Navigator.canPop(context);
+              },
+                child: Text('Statement'),),
+              RaisedButton(onPressed: (){
                 Navigator.of(context).pushNamed('/all');
                 // Navigator.maybePop(context);
                 // Navigator.pop(context);
